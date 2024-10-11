@@ -4,9 +4,10 @@ import remarkGfm from 'remark-gfm'
 import ReactMarkdown from 'react-markdown'
 import React from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import { Code, Accordion, AccordionItem, Dropdown, DropdownTrigger, DropdownMenu, Select, SelectItem, Chip, Textarea, Card, CardBody, Divider, DropdownItem, Checkbox, Button, Avatar, Tabs, Tab, Input } from '@nextui-org/react'
+import { Accordion, AccordionItem, Dropdown, DropdownTrigger, DropdownMenu, Select, SelectItem, Chip, Textarea, Card, CardBody, Divider, DropdownItem, Checkbox, Button, Avatar, Tabs, Tab, Input } from '@nextui-org/react'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useRouter } from 'next/navigation'
+import Code from '@/components/Code'
 
 async function getProblemInfo(url: string) {
         const response = await fetch(url)
@@ -18,6 +19,8 @@ async function getProblemInfo(url: string) {
 function Dashboard() {
         const genAI = new GoogleGenerativeAI("AIzaSyAPzGc5FkXZRaqoXDRRsFMp4f9qZ8gVKvg");
         const { data: session } = useSession();
+
+        const code = `print("Hello World")`;
 
         const [problemUrl, setProblemUrl] = React.useState("");
 
@@ -165,7 +168,7 @@ function Dashboard() {
                                                                         </div>
 
                                                                         <div className="solution w-2/3">
-                                                                                <Card>
+                                                                                <Card className="shadow-none border border-2 border-base-900 bg-base-400 dark:border-zinc-900 dark:bg-zinc-900">
                                                                                         {solution && (
                                                                                                 (<CardBody className="p-5">
                                                                                                         <Chip color="primary" variant="flat" radius="sm">Language: C++</Chip>
@@ -176,9 +179,11 @@ function Dashboard() {
                                                                                                                 {solution && JSON.parse(solution).map((hint: string, idx: Number) => <AccordionItem key={idx} title={'Hint ' + (parseInt(idx) + 1)}> {hint}</AccordionItem>)}
                                                                                                         </Accordion>
 
-                                                                                                        <div className="flex items-center mt-3">
-                                                                                                                <h3 className="font-bold p-3 text-xl">Solution</h3>
-                                                                                                                <Button className="w-1/6 font-bold" color="primary" variant="light">View Solution</Button>
+                                                                                                        <div className="flex flex-col mt-10">
+                                                                                                                <Accordion variant="bordered">
+                                                                                                                        <AccordionItem title="Solution">Solution</AccordionItem>
+                                                                                                                </Accordion>
+                                                                                                                <Code language="python" code={code} />
                                                                                                         </div>
                                                                                                 </CardBody>)
                                                                                         )}
