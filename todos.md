@@ -1,3 +1,4 @@
-- [ ] Add inline code blocks
+- [x] Add inline code blocks
 - [ ] Time Complexity
 - [ ] Multiple Solutions
+- [ ] Add recommended problems 

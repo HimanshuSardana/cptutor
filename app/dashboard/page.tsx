@@ -26,31 +26,46 @@ function Dashboard() {
 
         const [solution, setSolution] = React.useState("");
         const [problemStatement, setProblemStatement] = React.useState("");
+        const [lang, setLang] = React.useState(new Set([]));
 
         const router = useRouter();
 
-        async function getResult(prompt: string) {
+        async function getResult(prompt: string, language: string) {
                 const model = genAI.getGenerativeModel({
                         model: "gemini-1.5-flash",
                         systemInstruction:
                                 "You are a coding tutor. You are helping a student solve a coding problem. " +
                                 "The student is stuck and needs help to solve the problem. Instead of providing the code, " +
-                                "give the student hints to solve the problem, give 3 hints in the form of a JSON array, " +
+                                "give the student hints to solve the problem, give 3 hints along with code blocks in the form of a JSON array, " +
                                 "each hint should be a string. The student will use these hints to solve the problem." +
-                                "Do not add ```json, simply provide raw json"
+                                "let the array be of the form [{hint: '...', code: '...'}]. Also, include a 4th object that contains the entire solution The code should be in " + language + ". Do not add ```json, simply provide raw json,",
                 });
+
+                // old system prompt (for only hints)
+                //"You are a coding tutor. You are helping a student solve a coding problem. " +
+                //"The student is stuck and needs help to solve the problem. Instead of providing the code, " +
+                //"give the student hints to solve the problem, give 3 hints in the form of a JSON array, " +
+                //"each hint should be a string. The student will use these hints to solve the problem." +
+                //"Do not add ```json, simply provide raw json"
 
                 const result = await model.generateContent(prompt);
 
                 const rawResponse = await result.response.text();
-                console.log(rawResponse);
+                console.log(JSON.parse(JSON.stringify(rawResponse)));
 
-                setSolution((rawResponse));
+                //setSolution((rawResponse));
+                setSolution(JSON.parse(JSON.stringify(rawResponse)));
+                console.log(JSON.parse(solution)[3])
         }
 
         const [isCustomQuestion, setIsCustomQuestion] = React.useState(false);
-        // Check if session != null, push to dashboard
-        //session ? null : router.push("/")
+
+        //React.useEffect(() => {
+        //        if (session == null) {
+        //                router.push("/");
+        //        }
+        //}, [])
+
         return (
                 <>
                         <div className='navbar w-full  flex items-center justify-between'>
@@ -111,7 +126,7 @@ function Dashboard() {
                                                                                 <Input onValueChange={setProblemUrl} label="Problem URL" radius="sm" />
 
                                                                                 <div className="flex w-full my-4 items-center gap-4">
-                                                                                        <Select label="Language" radius='sm'>
+                                                                                        <Select label="Language" radius='sm' onChange={setLang}>
                                                                                                 <SelectItem key="python">Python</SelectItem>
                                                                                                 <SelectItem key="c++">C++</SelectItem>
                                                                                                 <SelectItem key="java">Java</SelectItem>
@@ -157,7 +172,7 @@ function Dashboard() {
                                                                                                 <SelectItem key="c++">C++</SelectItem>
                                                                                                 <SelectItem key="java">Java</SelectItem>
                                                                                         </Select>
-                                                                                        <Button radius='sm' variant='solid' className="font-bold" color='primary' size='lg' onClick={() => getResult(problemStatement)}>Help</Button>
+                                                                                        <Button radius='sm' variant='solid' className="font-bold" color='primary' size='lg' onClick={() => getResult(problemStatement, "c++")}>Help</Button>
                                                                                 </div>
 
                                                                                 <Divider />
@@ -168,22 +183,35 @@ function Dashboard() {
                                                                         </div>
 
                                                                         <div className="solution w-2/3">
-                                                                                <Card className="shadow-none border border-2 border-base-900 bg-base-400 dark:border-zinc-900 dark:bg-zinc-900">
+                                                                                <Card className="shadow-none border border-2 border-base-900 bg-zinc-100/10 dark:border-zinc-900 dark:bg-zinc-900">
                                                                                         {solution && (
                                                                                                 (<CardBody className="p-5">
                                                                                                         <Chip color="primary" variant="flat" radius="sm">Language: C++</Chip>
                                                                                                         <h3 className="font-bold p-3 text-xl">Hints</h3>
-                                                                                                        <Accordion variant="bordered" selectionMode="multiple">
-                                                                                                                {// solution.length != 0 ? solution.map((hint) => hint) : ""}
-                                                                                                                }
-                                                                                                                {solution && JSON.parse(solution).map((hint: string, idx: Number) => <AccordionItem key={idx} title={'Hint ' + (parseInt(idx) + 1)}> {hint}</AccordionItem>)}
-                                                                                                        </Accordion>
-
-                                                                                                        <div className="flex flex-col mt-10">
-                                                                                                                <Accordion variant="bordered">
-                                                                                                                        <AccordionItem title="Solution">Solution</AccordionItem>
+                                                                                                        {solution && (
+                                                                                                                <Accordion variant="bordered" selectionMode="multiple">
+                                                                                                                        <AccordionItem key="1" title="Hint 1">
+                                                                                                                                <h3>{JSON.parse(solution)[0].hint}</h3>
+                                                                                                                                <Code code={JSON.parse(solution)[0].code} language="cpp" />
+                                                                                                                        </AccordionItem>
+                                                                                                                        <AccordionItem key="2" title="Hint 2">
+                                                                                                                                <h3>{JSON.parse(solution)[1].hint}</h3>
+                                                                                                                                <Code code={JSON.parse(solution)[1].code} language="cpp" />
+                                                                                                                        </AccordionItem>
+                                                                                                                        <AccordionItem key="3" title="Hint 3">
+                                                                                                                                <h3>{JSON.parse(solution)[2].hint}</h3>
+                                                                                                                                <Code code={JSON.parse(solution)[2].code} language="cpp" />
+                                                                                                                        </AccordionItem>
                                                                                                                 </Accordion>
-                                                                                                                <Code language="python" code={code} />
+
+                                                                                                        )}
+                                                                                                        <div className="flex flex-col mt-10">
+                                                                                                                {solution &&
+                                                                                                                        (
+                                                                                                                                <Accordion variant="bordered">
+                                                                                                                                        <AccordionItem title="Solution"><Code code={JSON.parse(solution)[3].code} language="cpp" /></AccordionItem>
+                                                                                                                                </Accordion>
+                                                                                                                        )}
                                                                                                         </div>
                                                                                                 </CardBody>)
                                                                                         )}
