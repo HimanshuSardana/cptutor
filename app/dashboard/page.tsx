@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm'
 import ReactMarkdown from 'react-markdown'
 import React from 'react'
 import { useSession, signOut } from 'next-auth/react'
-import { Code, Dropdown, DropdownTrigger, DropdownMenu, Select, SelectItem, Textarea, Card, CardBody, Divider, DropdownItem, Checkbox, Button, Avatar, Tabs, Tab, Input } from '@nextui-org/react'
+import { Code, Accordion, AccordionItem, Dropdown, DropdownTrigger, DropdownMenu, Select, SelectItem, Chip, Textarea, Card, CardBody, Divider, DropdownItem, Checkbox, Button, Avatar, Tabs, Tab, Input } from '@nextui-org/react'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useRouter } from 'next/navigation'
 
@@ -42,7 +42,7 @@ function Dashboard() {
                 const rawResponse = await result.response.text();
                 console.log(rawResponse);
 
-                setSolution(JSON.parse(rawResponse));
+                setSolution((rawResponse));
         }
 
         const [isCustomQuestion, setIsCustomQuestion] = React.useState(false);
@@ -165,12 +165,23 @@ function Dashboard() {
                                                                         </div>
 
                                                                         <div className="solution w-2/3">
-                                                                                <h3 className="py-5 font-bold text-2xl">Solution</h3>
                                                                                 <Card>
-                                                                                        <CardBody className="p-5">
-                                                                                                {solution}
+                                                                                        {solution && (
+                                                                                                (<CardBody className="p-5">
+                                                                                                        <Chip color="primary" variant="flat" radius="sm">Language: C++</Chip>
+                                                                                                        <h3 className="font-bold p-3 text-xl">Hints</h3>
+                                                                                                        <Accordion variant="bordered" selectionMode="multiple">
+                                                                                                                {// solution.length != 0 ? solution.map((hint) => hint) : ""}
+                                                                                                                }
+                                                                                                                {solution && JSON.parse(solution).map((hint: string, idx: Number) => <AccordionItem key={idx} title={'Hint ' + (parseInt(idx) + 1)}> {hint}</AccordionItem>)}
+                                                                                                        </Accordion>
 
-                                                                                        </CardBody>
+                                                                                                        <div className="flex items-center mt-3">
+                                                                                                                <h3 className="font-bold p-3 text-xl">Solution</h3>
+                                                                                                                <Button className="w-1/6 font-bold" color="primary" variant="light">View Solution</Button>
+                                                                                                        </div>
+                                                                                                </CardBody>)
+                                                                                        )}
                                                                                 </Card>
                                                                         </div>
                                                                 </div>
